@@ -14,7 +14,7 @@ store.defineModel<EventModel>('event', {
     creator: null,
     create_time: 0,
     update_time: 0
-});
+} as EventModel);
 
 // 创建一个指定类型的记录
 Promise.all([
@@ -37,17 +37,17 @@ Promise.all([
 
     // 从缓存中查询一条记录
     store.findRecord('event', '0').then((record: Record<EventModel>) => {
-        console.log('store.findRecord: ', record);
-        record.name = 'ss';
-        console.log('modify record: ', record);
+        console.log('store.findRecord: ', JSON.stringify(record));
+        record.name = 'sss';
+        console.log('modify record: ', JSON.stringify(record));
 
         // 回滚记录
         record.rollBack();
-        console.log('record.rollBack: ', record);
+        console.log('record.rollBack: ', JSON.stringify(record));
         record.creator = 'dxw';
         // 保存更改
         record.save();
-        console.log('record.save: ', record);
+        console.log('record.save: ', JSON.stringify(record));
 
         // 删除记录
         record.destroyRecord();

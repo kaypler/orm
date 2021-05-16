@@ -2,20 +2,22 @@ const http = require('../utils/http');
 
 class Record<T> {
     readonly id: string
-    type: string = ''
-    name: string = ''
-    begin_time: number = 0
-    end_time: number = 0
-    description: string = ''
-    creator: string = ''
-    create_time: number = 0
-    update_time: number = 0
-    attrs: object
+    readonly type: string
+    #attrs:  T
+    [propName: string]: any
+    // type: string = ''
+    // name: string = ''
+    // begin_time: number = 0
+    // end_time: number = 0
+    // description: string = ''
+    // creator: string = ''
+    // create_time: number = 0
+    // update_time: number = 0
 
-    constructor(attrs: object) {
-        this.attrs = attrs;
+    constructor(attrs: T) {
+        this.#attrs = attrs;
         for (let key in attrs) {
-            this[key] = attrs[key];
+            this[key] = attrs[key] as any;
         }
     }
 
@@ -29,8 +31,8 @@ class Record<T> {
 
     /** 放弃所有未保存的记录更改 */
     rollBack() {
-        for (let key in this.attrs) {
-            this[key] = this.attrs[key];
+        for (let key in this.#attrs) {
+            this[key] = this.#attrs[key] as any;
         }
     }
 
@@ -39,10 +41,10 @@ class Record<T> {
      * @returns 返回保存请求是否完成
      */
     save() {
-        for (let key in this.attrs) {
-            this.attrs[key] = this[key];
+        for (let key in this.#attrs) {
+            this.#attrs[key] = this[key] as any;
         }
-        return http.put(`/${this.type}/${this.id}`, this.attrs);
+        return http.put(`/${this.type}/${this.id}`, this.#attrs);
     }
 }
 

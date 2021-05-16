@@ -5,9 +5,11 @@ const http = require('../utils/http');
 
 class Store {
     private cache: Map<string, Array<Record<any>>>;
+    private models: Map<string, any>;
 
     constructor () {
         this.cache = new Map();
+        this.models = new Map();
     }
 
     /**
@@ -19,7 +21,8 @@ class Store {
     createRecord (type: string, attrs: object): Promise<Record<any>> {
         return new Promise((resolve: Function) => {
             http.post(`/${type}`, attrs).then((data) => {
-                resolve(new Record(data));
+                const model = this.models.get(type);
+                resolve(new Record<typeof model>(data));
             });
         });
     }
@@ -34,6 +37,7 @@ class Store {
 
         const list = new Array<Record<T>>();
         this.cache.set(type, list);
+        this.models.set(type, attrs);
     }
 
     /**
@@ -51,7 +55,8 @@ class Store {
                 resolve(records[index]);
             } else {
                 http.get(`/${type}/${id}`).then((data: Record<any>) => {
-                    resolve(new Record(data));
+                    const model = this.models.get(type);
+                    resolve(new Record<typeof model>(data));
                 });
             }
         });
@@ -66,7 +71,8 @@ class Store {
     query (type: string, params: object) {
         return new Promise((resolve: Function, reject: Function) => {
             http.get(`/${type}/?${toUrlParams(params)}`).then((list: Array<Record<any>>) => {
-                const newRecords = list.map(item => new Record(item));
+                const model = this.models.get(type);
+                const newRecords = list.map(item => new Record<typeof model>(item));
                 const records = this.cache.get(type) || [];
                 this.cache.set(type, uniqBy(records.concat(newRecords), 'id'));
                 resolve(newRecords);
@@ -85,7 +91,8 @@ class Store {
     queryRecord (type: string, id: object) {
         return new Promise((resolve: Function) => {
             http.get(`/${type}/${id}`).then((data: Record<any>) => {
-                const record = new Record(data);
+                const model = this.models.get(type);
+                const record = new Record<typeof model>(data);
                 const records = this.cache.get(type) || [];
                 const index = records.findIndex((item: Record<any>) => item.id === record.id);
                 if (index !== -1) {
