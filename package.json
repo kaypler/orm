@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "start": "webpack serve"
+    "start": "webpack serve",
+    "lint": "tslint \"src/**/*.ts\" --force"
   },
   "author": "xuwen.deng",
   "license": "ISC",
